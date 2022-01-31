@@ -17,7 +17,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    socket->connectToHost("194.44.220.91",4423);
+    socket->connectToHost("localhost", 4423);
 }
 
 void MainWindow::sockDisc()
@@ -68,12 +68,12 @@ void MainWindow::on_pushButton_2_clicked()
 {
     if(socket->isOpen())
     {
-        socket->write("{\"type\":\"select\",\"params\":\"workers\"}");
+        socket->write("{\"type\":\"select\",\"params\":\"flats\"}");
         socket->waitForBytesWritten(500);
     }
     else
     {
-        QMessageBox::iformation(this,"information","Don`t connect");
+        QMessageBox::information(this,"information","Don`t connect");
     }
 }
 

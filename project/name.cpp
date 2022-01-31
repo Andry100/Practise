@@ -35,55 +35,55 @@ void myserver::incomingConnection(int socketDescriptor)
 
     qDebug()<<socketDescriptor<<"Client connected";
 
-    socket->write("{\type\":\"connect\",\"status\":\"yes\"}");
+    socket->write("{\"type\":\"connect\",\"status\":\"yes\"}");
     qDebug()<<"Send client connect status - Yes";
 }
 
 void myserver::sockReady()
-{
-Data = socket->readAll();
-qDebug()<<"Data:" << Data;
+{   
+    Data = socket->readAll();
+    qDebug()<<"Data:" << Data;
 
-doc = QJsonDocument::fromJson(Data, &docError);
+    QJsonDocument doc = QJsonDocument::fromJson(Data, &docError);
 
-if(docError.errorString().toInt()==QJsonParseError::NoError)
-{
-    if((doc.object().value("type").toString()=="select") && (doc.object().value("params").toString() == "workers"))
+    if(docError.errorString().toInt()==QJsonParseError::NoError)
     {
-        if(db.isOpen())
+        if((doc.object().value("type").toString()=="select") && (doc.object().value("params").toString() == "workers"))
         {
-            QByteArray itog = "{\"type\":\"resultSelect\",\"result\":[";
-
-            QSqlQuery* query = new  QSqlQuery(db);
-            if(query->exec("SELECT name FROM listflats"))
+            if(db.isOpen())
             {
-                while(query->next())
+                QByteArray itog = "{\"type\":\"resultSelect\",\"result\":[";
+
+                QSqlQuery* query = new  QSqlQuery(db);
+                if(query->exec("SELECT name FROM listflats"))
                 {
-                    itog.append("{\"name\":\""+query->value(0).toString()+"\"},");
+                    while(query->next())
+                    {
+                        itog.append("{\"name\":\""+query->value(0).toString()+"\"},");
+                    }
+                    itog.remove(itog.length() -1,1);
+                    itog.append("]}");
+
+                    socket->write(itog);
+                    socket->waitForBytesWritten(500);
                 }
-                itog.remove(itog.lenght()-1,1);
-                itog.append("]}");
-
-                socket->write(itog);
-                socket->waitForBytesWritten(500);
             }
-        }
-       QFile file;
-       file.setFileName("  ");
-      if(file.open(QIODevice::ReadOnly|QFile::Text))
-      {
-          QByteArray fromFile = file.readAll();
-          QByteArray itog = "{\"type\":\"resultSelect\",\"result\":"+fromFile+"}";
+           QFile file;
+           file.setFileName("  ");
+          if(file.open(QIODevice::ReadOnly|QFile::Text))
+          {
+              QByteArray fromFile = file.readAll();
+              QByteArray itog = "{\"type\":\"resultSelect\",\"result\":"+fromFile+"}";
 
-          socket->write(itog);
-          socket->waitForBytesWritten(500);
-      }
-      file.close();
+              socket->write(itog);
+              socket->waitForBytesWritten(500);
+          }
+          file.close();
+        }
     }
 }
-}
 
-void nameSockDisc()
+void myserver::sockDisc()
 {
     qDebug()<<"Disconnect";
     socket->deleteLater();

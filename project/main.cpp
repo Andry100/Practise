@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
             break;
         }
     }
- name Server;
- Server.startServer();
+    myserver Server;
+    Server.startServer();
+
     return a.exec();
 }
